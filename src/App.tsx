@@ -85,10 +85,77 @@ function HomePage() {
       {/* Hero: text follows scroll (sticky near top) then disappears under the black block */}
       <section className="relative z-0">
         <div className="h-[50vh]" />
-        <h1 className="sticky top-16 text-4xl sm:text-5xl font-extrabold tracking-tight px-5 text-center">Välkommen hem</h1>
+        <div className="sticky top-16 px-5 text-center">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">Välkommen hem</h1>
+          <p className="mt-2 text-white/70 text-sm sm:text-base">Här ska det stå något smart</p>
+        </div>
       </section>
 
-      
+      {/* Info sections */}
+      <section id="about" className="min-h-screen flex items-center">
+        <div className="max-w-[1100px] mx-auto px-5 w-full">
+          <div className="relative glass-card reveal-left max-w-[700px]">
+            <span className="accent-blob -left-16 -top-10 w-72 h-72 rounded-full bg-emerald-500/30" />
+            <h2 className="text-2xl font-bold mb-3">Om sidan</h2>
+            <p className="text-white/70">Detta är en samlingssida för olika typer av hjälpredor för en framtida Home Assistant..</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="battery" className="min-h-screen flex items-center">
+        <div className="max-w-[1100px] mx-auto px-5 w-full">
+          <div className="relative glass-card reveal-right max-w-[700px] ml-auto">
+            <span className="accent-blob -right-16 -top-10 w-72 h-72 rounded-full bg-cyan-500/30" />
+            <h2 className="text-2xl font-bold mb-3">Batteri</h2>
+            <p className="text-white/70 mb-3">Här kommer man kunna se olika enheters batteriprocenter.</p>
+            <NavLink to="/battery" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 hover:bg-white/20">Gå till Batteri</NavLink>
+          </div>
+        </div>
+      </section>
+
+      <section id="prices" className="min-h-screen flex items-center">
+        <div className="max-w-[1100px] mx-auto px-5 w-full">
+          <div className="relative glass-card reveal-left max-w-[700px]">
+            <span className="accent-blob -left-16 -top-10 w-72 h-72 rounded-full bg-blue-500/30" />
+            <h2 className="text-2xl font-bold mb-3">Elpriser</h2>
+            <p className="text-white/70 mb-3">Se SE1–SE4 spotpriser i realtid och hitta bästa fönster för förbrukning och försäljning.</p>
+            <NavLink to="/prices" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 hover:bg-white/20">Gå till Priser</NavLink>
+          </div>
+        </div>
+      </section>
+
+      <section id="calendar" className="min-h-screen flex items-center">
+        <div className="max-w-[1100px] mx-auto px-5 w-full">
+          <div className="relative glass-card reveal-right max-w-[700px] ml-auto">
+            <span className="accent-blob -right-16 -top-10 w-72 h-72 rounded-full bg-pink-500/30" />
+            <h2 className="text-2xl font-bold mb-3">Kalender</h2>
+            <p className="text-white/70 mb-3">En samlingssida för en gemensam kalender.</p>
+            <NavLink to="/calendar" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 hover:bg-white/20">Gå till Kalender</NavLink>
+          </div>
+        </div>
+      </section>
+
+      <section id="weather" className="min-h-screen flex items-center">
+        <div className="max-w-[1100px] mx-auto px-5 w-full">
+          <div className="relative glass-card reveal-left max-w-[700px]">
+            <span className="accent-blob -left-16 -top-10 w-72 h-72 rounded-full bg-indigo-500/30" />
+            <h2 className="text-2xl font-bold mb-3">Väder</h2>
+            <p className="text-white/70 mb-3">Enkelt att kunna se väder via Open‑Meteo.</p>
+            <NavLink to="/weather" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 hover:bg-white/20">Gå till Väder</NavLink>
+          </div>
+        </div>
+      </section>
+
+      <section id="todo" className="min-h-screen flex items-center">
+        <div className="max-w-[1100px] mx-auto px-5 w-full">
+          <div className="relative glass-card reveal-right max-w-[700px] ml-auto">
+            <span className="accent-blob -right-16 -top-10 w-72 h-72 rounded-full bg-amber-500/30" />
+            <h2 className="text-2xl font-bold mb-3">Att göra</h2>
+            <p className="text-white/70 mb-3">Håll koll på små uppgifter med en enkel och snabb lista.</p>
+            <NavLink to="/todo" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 hover:bg-white/20">Gå till Att göra</NavLink>
+          </div>
+        </div>
+      </section>
     </main>
   )
 }
