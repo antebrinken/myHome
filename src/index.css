@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Minimal global adjustments */
+:root { scroll-behavior: smooth; }
+html, body, #root { height: 100%; }
+body { @apply bg-slate-900 text-slate-100; }
