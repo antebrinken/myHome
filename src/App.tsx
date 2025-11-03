@@ -1,6 +1,7 @@
  
+import { useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
-import { Battery, Calendar as CalendarIcon, Cloud, ListTodo, Bolt, Mail, Phone } from 'lucide-react'
+import { Battery, Calendar as CalendarIcon, Cloud, ListTodo, Bolt, Mail, Phone, Menu, X } from 'lucide-react'
 import LoginPage from './pages/Login'
 import RegisterPage from './pages/Register'
 import ProfilePage from './pages/Profile'
@@ -19,13 +20,15 @@ import TodoPage from './pages/TodoPage'
 
 function Header() {
   const { user, logout } = useAuth()
+  const [mobileOpen, setMobileOpen] = useState(false)
   return (
     <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur border-b border-white/10">
       <div className="max-w-[1100px] mx-auto px-5 h-16 flex items-center justify-between">
-        <NavLink to="/" className="font-extrabold tracking-tight flex items-center gap-2">
+        <NavLink to="/" className="font-extrabold tracking-tight flex items-center gap-2" onClick={() => setMobileOpen(false)}>
           <Bolt className="w-5 h-5" /> myHome
         </NavLink>
-        <nav className="flex gap-3 text-sm items-center">
+        {/* Desktop nav */}
+        <nav className="hidden sm:flex gap-3 text-sm items-center">
           <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/battery"><Battery className="w-4 h-4" /> Batteri</NavLink>
           <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/prices"><Bolt className="w-4 h-4" /> Priser</NavLink>
           <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/calendar"><CalendarIcon className="w-4 h-4" /> Kalender</NavLink>
@@ -46,7 +49,42 @@ function Header() {
             </>
           )}
         </nav>
+        {/* Mobile hamburger */}
+        <button
+          className="sm:hidden p-2 rounded-md hover:bg-white/10"
+          aria-label="Öppna meny"
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen((v) => !v)}
+        >
+          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </div>
+      {/* Mobile menu panel */}
+      {mobileOpen && (
+        <div className="sm:hidden border-t border-white/10 bg-slate-900/95 backdrop-blur">
+          <div className="max-w-[1100px] mx-auto px-5 py-3 flex flex-col gap-1">
+            <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/battery" onClick={() => setMobileOpen(false)}><Battery className="w-4 h-4" /> Batteri</NavLink>
+            <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/prices" onClick={() => setMobileOpen(false)}><Bolt className="w-4 h-4" /> Priser</NavLink>
+            <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/calendar" onClick={() => setMobileOpen(false)}><CalendarIcon className="w-4 h-4" /> Kalender</NavLink>
+            <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/weather" onClick={() => setMobileOpen(false)}><Cloud className="w-4 h-4" /> Väder</NavLink>
+            <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/todo" onClick={() => setMobileOpen(false)}><ListTodo className="w-4 h-4" /> Att göra</NavLink>
+            <div className="h-px bg-white/10 my-2" />
+            {!user && (
+              <>
+                <NavLink className="px-3 py-2 rounded-md hover:bg-white/10" to="/login" onClick={() => setMobileOpen(false)}>Logga in</NavLink>
+                <NavLink className="px-3 py-2 rounded-md hover:bg-white/10" to="/register" onClick={() => setMobileOpen(false)}>Registrera</NavLink>
+              </>
+            )}
+            {user && (
+              <>
+                <NavLink className="px-3 py-2 rounded-md hover:bg-white/10" to="/profile" onClick={() => setMobileOpen(false)}>Profil</NavLink>
+                <NavLink className="px-3 py-2 rounded-md hover:bg-white/10" to="/settings" onClick={() => setMobileOpen(false)}>Inställningar</NavLink>
+                <button onClick={() => { logout(); setMobileOpen(false) }} className="px-3 py-2 text-left rounded-md hover:bg-white/10">Logga ut</button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   )
 }
@@ -66,14 +104,16 @@ function Header() {
 function Footer() {
   const year = new Date().getFullYear()
   return (
-    <footer className="h-16 sm:h-20 bg-slate-900/80 border-t border-white/10">
-      <div className="max-w-[1100px] mx-auto px-5 h-full flex items-center justify-between">
-        <div className="flex items-center gap-6 text-sm sm:text-base">
-          <span className="font-medium">&copy; {year} Philip Antebrink</span>
-          <a className="hover:underline inline-flex items-center gap-2" href="mailto:antebrinken@live.se"><Mail className="w-4 h-4" /> antebrinken@live.se</a>
-          <a className="hover:underline inline-flex items-center gap-2" href="tel:+46734177109"><Phone className="w-4 h-4" /> 0734177109</a>
+    <footer className="py-4 sm:h-20 bg-slate-900/80 border-t border-white/10">
+      <div className="max-w-[1100px] mx-auto px-5 h-full flex items-center justify-center">
+        <div className="w-full flex flex-col items-center gap-2 text-center sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col items-center gap-2 text-sm sm:text-base sm:flex-row sm:gap-6">
+            <span className="font-medium">&copy; {year} Philip Antebrink</span>
+            <a className="hover:underline inline-flex items-center gap-2" href="mailto:antebrinken@live.se"><Mail className="w-4 h-4" /> antebrinken@live.se</a>
+            <a className="hover:underline inline-flex items-center gap-2" href="tel:+46734177109"><Phone className="w-4 h-4" /> 0734177109</a>
+          </div>
+          <a href="#top" className="text-sm sm:text-base hover:underline">Till toppen</a>
         </div>
-        <a href="#top" className="text-sm sm:text-base hover:underline">Till toppen</a>
       </div>
     </footer>
   )
@@ -92,67 +132,67 @@ function HomePage() {
       </section>
 
       {/* Info sections */}
-      <section id="about" className="min-h-screen flex items-center">
+      <section id="about" className="min-h-screen flex items-center py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-5 w-full">
           <div className="relative glass-card reveal-left max-w-[700px]">
-            <span className="accent-blob -left-16 -top-10 w-72 h-72 rounded-full bg-emerald-500/30" />
-            <h2 className="text-2xl font-bold mb-3">Om sidan</h2>
-            <p className="text-white/70">Detta är en samlingssida för olika typer av hjälpredor för en framtida Home Assistant..</p>
+            <span className="accent-blob -left-10 -top-8 w-40 h-40 sm:w-72 sm:h-72 rounded-full bg-emerald-500/30" />
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Om sidan</h2>
+            <p className="text-white/70 text-sm sm:text-base">Detta är en samlingssida för olika typer av hjälpredor för en framtida Home Assistant..</p>
           </div>
         </div>
       </section>
 
-      <section id="battery" className="min-h-screen flex items-center">
+      <section id="battery" className="min-h-screen flex items-center py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-5 w-full">
-          <div className="relative glass-card reveal-right max-w-[700px] ml-auto">
-            <span className="accent-blob -right-16 -top-10 w-72 h-72 rounded-full bg-cyan-500/30" />
-            <h2 className="text-2xl font-bold mb-3">Batteri</h2>
-            <p className="text-white/70 mb-3">Här kommer man kunna se olika enheters batteriprocenter.</p>
-            <NavLink to="/battery" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 hover:bg-white/20">Gå till Batteri</NavLink>
+          <div className="relative glass-card reveal-right max-w-[700px] sm:ml-auto">
+            <span className="accent-blob -right-10 -top-8 w-40 h-40 sm:w-72 sm:h-72 rounded-full bg-cyan-500/30" />
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Batteri</h2>
+            <p className="text-white/70 text-sm sm:text-base mb-3">Här kommer man kunna se olika enheters batteriprocenter.</p>
+            <NavLink to="/battery" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm sm:text-base hover:bg-white/20">Gå till Batteri</NavLink>
           </div>
         </div>
       </section>
 
-      <section id="prices" className="min-h-screen flex items-center">
-        <div className="max-w-[1100px] mx-auto px-5 w-full">
-          <div className="relative glass-card reveal-left max-w-[700px]">
-            <span className="accent-blob -left-16 -top-10 w-72 h-72 rounded-full bg-blue-500/30" />
-            <h2 className="text-2xl font-bold mb-3">Elpriser</h2>
-            <p className="text-white/70 mb-3">Se SE1–SE4 spotpriser i realtid och hitta bästa fönster för förbrukning och försäljning.</p>
-            <NavLink to="/prices" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 hover:bg-white/20">Gå till Priser</NavLink>
-          </div>
-        </div>
-      </section>
-
-      <section id="calendar" className="min-h-screen flex items-center">
-        <div className="max-w-[1100px] mx-auto px-5 w-full">
-          <div className="relative glass-card reveal-right max-w-[700px] ml-auto">
-            <span className="accent-blob -right-16 -top-10 w-72 h-72 rounded-full bg-pink-500/30" />
-            <h2 className="text-2xl font-bold mb-3">Kalender</h2>
-            <p className="text-white/70 mb-3">En samlingssida för en gemensam kalender.</p>
-            <NavLink to="/calendar" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 hover:bg-white/20">Gå till Kalender</NavLink>
-          </div>
-        </div>
-      </section>
-
-      <section id="weather" className="min-h-screen flex items-center">
+      <section id="prices" className="min-h-screen flex items-center py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-5 w-full">
           <div className="relative glass-card reveal-left max-w-[700px]">
-            <span className="accent-blob -left-16 -top-10 w-72 h-72 rounded-full bg-indigo-500/30" />
-            <h2 className="text-2xl font-bold mb-3">Väder</h2>
-            <p className="text-white/70 mb-3">Enkelt att kunna se väder via Open‑Meteo.</p>
-            <NavLink to="/weather" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 hover:bg-white/20">Gå till Väder</NavLink>
+            <span className="accent-blob -left-10 -top-8 w-40 h-40 sm:w-72 sm:h-72 rounded-full bg-blue-500/30" />
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Elpriser</h2>
+            <p className="text-white/70 text-sm sm:text-base mb-3">Se SE1–SE4 spotpriser i realtid och hitta bästa fönster för förbrukning och försäljning.</p>
+            <NavLink to="/prices" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm sm:text-base hover:bg-white/20">Gå till Priser</NavLink>
           </div>
         </div>
       </section>
 
-      <section id="todo" className="min-h-screen flex items-center">
+      <section id="calendar" className="min-h-screen flex items-center py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-5 w-full">
-          <div className="relative glass-card reveal-right max-w-[700px] ml-auto">
-            <span className="accent-blob -right-16 -top-10 w-72 h-72 rounded-full bg-amber-500/30" />
-            <h2 className="text-2xl font-bold mb-3">Att göra</h2>
-            <p className="text-white/70 mb-3">Håll koll på små uppgifter med en enkel och snabb lista.</p>
-            <NavLink to="/todo" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 hover:bg-white/20">Gå till Att göra</NavLink>
+          <div className="relative glass-card reveal-right max-w-[700px] sm:ml-auto">
+            <span className="accent-blob -right-10 -top-8 w-40 h-40 sm:w-72 sm:h-72 rounded-full bg-pink-500/30" />
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Kalender</h2>
+            <p className="text-white/70 text-sm sm:text-base mb-3">En samlingssida för en gemensam kalender.</p>
+            <NavLink to="/calendar" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm sm:text-base hover:bg-white/20">Gå till Kalender</NavLink>
+          </div>
+        </div>
+      </section>
+
+      <section id="weather" className="min-h-screen flex items-center py-16 sm:py-24">
+        <div className="max-w-[1100px] mx-auto px-5 w-full">
+          <div className="relative glass-card reveal-left max-w-[700px]">
+            <span className="accent-blob -left-10 -top-8 w-40 h-40 sm:w-72 sm:h-72 rounded-full bg-indigo-500/30" />
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Väder</h2>
+            <p className="text-white/70 text-sm sm:text-base mb-3">Enkelt att kunna se väder via Open‑Meteo.</p>
+            <NavLink to="/weather" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm sm:text-base hover:bg-white/20">Gå till Väder</NavLink>
+          </div>
+        </div>
+      </section>
+
+      <section id="todo" className="min-h-screen flex items-center py-16 sm:py-24">
+        <div className="max-w-[1100px] mx-auto px-5 w-full">
+          <div className="relative glass-card reveal-right max-w-[700px] sm:ml-auto">
+            <span className="accent-blob -right-10 -top-8 w-40 h-40 sm:w-72 sm:h-72 rounded-full bg-amber-500/30" />
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Att göra</h2>
+            <p className="text-white/70 text-sm sm:text-base mb-3">Håll koll på små uppgifter med en enkel och snabb lista.</p>
+            <NavLink to="/todo" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm sm:text-base hover:bg-white/20">Gå till Att göra</NavLink>
           </div>
         </div>
       </section>

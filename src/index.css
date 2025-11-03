@@ -50,3 +50,13 @@ body::before {
   filter: blur(20px);
   opacity: 0.35;
 }
+
+/* Mobile refinements */
+@media (max-width: 640px) {
+  .glass-card { padding: 1rem 1rem; border-radius: 0.875rem; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-left, .reveal-right { animation: none; }
+}
