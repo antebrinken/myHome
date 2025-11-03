@@ -107,30 +107,163 @@ function BatterySection() {
 }
 
 function PricesSection() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [dateLabel, setDateLabel] = useState('')
+  const [rows, setRows] = useState<Array<{
+    key: string
+    time: string
+    SE1?: number
+    SE2?: number
+    SE3?: number
+    SE4?: number
+  }>>([])
+  const [summary, setSummary] = useState<null | Record<string, any>>(null)
+  // Keep for potential future use (e.g., charts); not used directly now
+  // const [zonesData, setZonesData] = useState<any | null>(null)
+  const [selectedZone, setSelectedZone] = useState<'SE1' | 'SE2' | 'SE3' | 'SE4'>('SE3')
+  const [showTable, setShowTable] = useState(false)
+
+  useEffect(() => {
+    async function run() {
+      setLoading(true)
+      setError(null)
+      try {
+        const today = new Date()
+        const { fetchTodaySwedenPrices, bestWindows, bestSellHour, formatDateStockholm, formatTimeStockholm } = await import('./modules/prices/elspot')
+        const data = await fetchTodaySwedenPrices(today)
+        setDateLabel(formatDateStockholm(today))
+        // Build time keys from SE3 (fallback any zone)
+        const anyZone = data.SE3?.length ? 'SE3' : (Object.keys(data)[0] as any)
+        const times = (data as any)[anyZone].map((e: any) => ({ key: e.start.toISOString(), start: e.start }))
+        const map: Record<string, any> = {}
+        for (const t of times) {
+          map[t.key] = { key: t.key, time: `${formatTimeStockholm(t.start)}` }
+        }
+        ;(['SE1','SE2','SE3','SE4'] as const).forEach((z) => {
+          const arr = (data as any)[z] as any[]
+          if (!arr) return
+          for (const e of arr) {
+            const k = e.start.toISOString()
+            if (!map[k]) map[k] = { key: k, time: `${formatTimeStockholm(e.start)}` }
+            map[k][z] = e.sekPerKwh
+          }
+        })
+        const rowArr = Object.values(map).sort((a: any, b: any) => a.key.localeCompare(b.key))
+        setRows(rowArr)
+
+        // Summary windows per zone
+        const sum: any = {}
+        ;(['SE1','SE2','SE3','SE4'] as const).forEach((z) => {
+          const arr = (data as any)[z] as any[]
+          if (!arr || !arr.length) return
+          sum[z] = {
+            w2: bestWindows(arr, 2),
+            w4: bestWindows(arr, 4),
+            sell1: bestSellHour(arr),
+          }
+        })
+        setSummary(sum)
+      } catch (e: any) {
+        setError(e?.message || 'Failed to load spot prices')
+      } finally {
+        setLoading(false)
+      }
+    }
+    run()
+  }, [])
+
   return (
     <section id="prices" className="py-14 border-b border-white/5">
       <div className="max-w-[1100px] mx-auto px-5">
-        <h2 className="text-2xl mb-4">Prices</h2>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-            <h3>Electronics</h3>
-            <p className="text-white/60">Quick glance at current deals.</p>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Phone — $699</li>
-              <li>Laptop — $1199</li>
-              <li>Headphones — $199</li>
-            </ul>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-            <h3>Accessories</h3>
-            <p className="text-white/60">Everyday essentials.</p>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Charger — $29</li>
-              <li>Cable — $12</li>
-              <li>Case — $25</li>
-            </ul>
+        <h2 className="text-2xl mb-4">Electricity Spot Prices (SE)</h2>
+        <div className="text-white/70 text-sm mb-4">Date (Stockholm): {dateLabel}</div>
+        <div className="mb-3 flex items-center gap-2">
+          <span className="text-sm text-white/60">Zone:</span>
+          {(['SE1','SE2','SE3','SE4'] as const).map((z) => (
+            <button
+              key={z}
+              onClick={() => setSelectedZone(z)}
+              className={`text-sm rounded-md px-3 py-1 border ${selectedZone === z ? 'bg-indigo-600/30 border-indigo-400/50' : 'bg-white/5 border-white/20 hover:bg-white/10'}`}
+            >
+              {z}
+            </button>
+          ))}
+          <div className="ml-auto">
+            <button
+              onClick={() => setShowTable((v) => !v)}
+              className="text-sm rounded-md px-3 py-1 border bg-white/5 border-white/20 hover:bg-white/10"
+            >
+              {showTable ? 'Hide hourly prices' : 'Show hourly prices'}
+            </button>
           </div>
         </div>
+        {loading && <div className="text-white/70">Loading prices…</div>}
+        {error && <div className="text-rose-400">{error}</div>}
+        {!loading && !error && summary && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+            {(['SE1','SE2','SE3','SE4'] as const).map((z) => (
+              <div key={z} className={`rounded-xl p-4 ${selectedZone === z ? 'bg-indigo-500/10 border border-indigo-400/40' : 'bg-white/5 border border-white/10'}`}>
+                <div className="font-semibold mb-2">{z}</div>
+                {summary[z] ? (
+                  <div className="grid gap-1 text-sm">
+                    <div className="text-white/70">Cheapest 2h</div>
+                    <div>
+                      {summary[z].w2 ? `${new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Stockholm', hour: '2-digit', minute: '2-digit' }).format(summary[z].w2.start)}–${new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Stockholm', hour: '2-digit', minute: '2-digit' }).format(summary[z].w2.end)} · ${summary[z].w2.average.toFixed(2)} SEK/kWh` : '—'}
+                    </div>
+                    <div className="text-white/70 mt-1">Cheapest 4h</div>
+                    <div>
+                      {summary[z].w4 ? `${new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Stockholm', hour: '2-digit', minute: '2-digit' }).format(summary[z].w4.start)}–${new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Stockholm', hour: '2-digit', minute: '2-digit' }).format(summary[z].w4.end)} · ${summary[z].w4.average.toFixed(2)} SEK/kWh` : '—'}
+                    </div>
+                    <div className="text-white/70 mt-1">Best 1h sell</div>
+                    <div>
+                      {summary[z].sell1 ? `${new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Stockholm', hour: '2-digit', minute: '2-digit' }).format(summary[z].sell1.start)}–${new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Stockholm', hour: '2-digit', minute: '2-digit' }).format(summary[z].sell1.end)} · ${summary[z].sell1.price.toFixed(2)} SEK/kWh` : '—'}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-white/60 text-sm">No data</div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!loading && !error && rows.length > 0 && showTable && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="text-white/70">
+                <tr>
+                  <th className="py-2 pr-3">Time</th>
+                  <th className="py-2 pr-3">SE1</th>
+                  <th className="py-2 pr-3">SE2</th>
+                  <th className="py-2 pr-3">SE3</th>
+                  <th className="py-2 pr-3">SE4</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => {
+                  // Row highlighting based on selected zone windows
+                  const z = selectedZone
+                  const s = summary?.[z]
+                  const t = new Date(r.key)
+                  const in2 = s?.w2 && t >= s.w2.start && t < s.w2.end
+                  const in4 = s?.w4 && t >= s.w4.start && t < s.w4.end
+                  const sell = s?.sell1 && t >= s.sell1.start && t < s.sell1.end
+                  const rowClass = in4 ? 'bg-emerald-500/10' : in2 ? 'bg-teal-500/10' : sell ? 'bg-rose-500/10' : ''
+                  return (
+                  <tr key={r.key} className={`border-t border-white/10 ${rowClass}`}>
+                    <td className="py-2 pr-3 text-white/90 tabular-nums">{r.time}</td>
+                    <td className={`py-2 pr-3 tabular-nums ${selectedZone==='SE1' ? 'font-semibold' : ''}`}>{r.SE1?.toFixed(2) ?? '—'}</td>
+                    <td className={`py-2 pr-3 tabular-nums ${selectedZone==='SE2' ? 'font-semibold' : ''}`}>{r.SE2?.toFixed(2) ?? '—'}</td>
+                    <td className={`py-2 pr-3 tabular-nums ${selectedZone==='SE3' ? 'font-semibold' : ''}`}>{r.SE3?.toFixed(2) ?? '—'}</td>
+                    <td className={`py-2 pr-3 tabular-nums ${selectedZone==='SE4' ? 'font-semibold' : ''}`}>{r.SE4?.toFixed(2) ?? '—'}</td>
+                  </tr>
+                )})}
+              </tbody>
+            </table>
+            <div className="text-xs text-white/50 mt-2">Values in SEK/kWh. Times shown in Europe/Stockholm.</div>
+          </div>
+        )}
       </div>
     </section>
   )
