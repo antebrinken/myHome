@@ -34,8 +34,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = useCallback(async (email: string, password: string) => {
     email = email.trim()
-    if (!email || !password) return { ok: false as const, message: 'Email and password are required.' }
-    if (findUserByEmail(email)) return { ok: false as const, message: 'Email already registered.' }
+    if (!email || !password) return { ok: false as const, message: 'E‑post och lösenord krävs.' }
+    if (findUserByEmail(email)) return { ok: false as const, message: 'E‑postadressen är redan registrerad.' }
     const passwordHash = await sha256(password)
     const record: UserRecord = {
       id: crypto.randomUUID(),
@@ -51,9 +51,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const existing = findUserByEmail(email.trim())
-    if (!existing) return { ok: false as const, message: 'Invalid credentials.' }
+    if (!existing) return { ok: false as const, message: 'Ogiltiga uppgifter.' }
     const hash = await sha256(password)
-    if (hash !== existing.passwordHash) return { ok: false as const, message: 'Invalid credentials.' }
+    if (hash !== existing.passwordHash) return { ok: false as const, message: 'Ogiltiga uppgifter.' }
     setSession(existing.id)
     setUser({ id: existing.id, email: existing.email, createdAt: existing.createdAt })
     return { ok: true as const }
@@ -65,13 +65,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const updateEmail = useCallback(async (newEmail: string) => {
-    if (!user) return { ok: false as const, message: 'Not authenticated.' }
+    if (!user) return { ok: false as const, message: 'Inte autentiserad.' }
     newEmail = newEmail.trim()
-    if (!newEmail) return { ok: false as const, message: 'Email is required.' }
+    if (!newEmail) return { ok: false as const, message: 'E‑post krävs.' }
     const existing = findUserByEmail(newEmail)
-    if (existing && existing.id !== user.id) return { ok: false as const, message: 'Email already in use.' }
+    if (existing && existing.id !== user.id) return { ok: false as const, message: 'E‑postadressen används redan.' }
     const current = getUserById(user.id)
-    if (!current) return { ok: false as const, message: 'User not found.' }
+    if (!current) return { ok: false as const, message: 'Användaren hittades inte.' }
     const updated: UserRecord = { ...current, email: newEmail }
     updateUser(updated)
     setUser({ id: updated.id, email: updated.email, createdAt: updated.createdAt })
@@ -79,11 +79,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user])
 
   const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {
-    if (!user) return { ok: false as const, message: 'Not authenticated.' }
+    if (!user) return { ok: false as const, message: 'Inte autentiserad.' }
     const record = getUserById(user.id)
-    if (!record) return { ok: false as const, message: 'User not found.' }
+    if (!record) return { ok: false as const, message: 'Användaren hittades inte.' }
     const currentHash = await sha256(currentPassword)
-    if (currentHash !== record.passwordHash) return { ok: false as const, message: 'Current password is incorrect.' }
+    if (currentHash !== record.passwordHash) return { ok: false as const, message: 'Nuvarande lösenord är felaktigt.' }
     const newHash = await sha256(newPassword)
     const updated: UserRecord = { ...record, passwordHash: newHash }
     updateUser(updated)

@@ -18,7 +18,7 @@ export async function geocodeCity(name: string): Promise<
   | { latitude: number; longitude: number; displayName: string }
   | null
 > {
-  const url = `${GEOCODE_SEARCH_URL}?name=${encodeURIComponent(name)}&count=1&language=en&format=json`
+  const url = `${GEOCODE_SEARCH_URL}?name=${encodeURIComponent(name)}&count=1&language=sv&format=json`
   const res = await fetch(url)
   if (!res.ok) return null
   const data = (await res.json()) as any
@@ -35,7 +35,7 @@ export async function reverseGeocode(lat: number, lon: number): Promise<
   | { latitude: number; longitude: number; displayName: string }
   | null
 > {
-  const url = `${GEOCODE_REVERSE_URL}?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&count=1&language=en&format=json`
+  const url = `${GEOCODE_REVERSE_URL}?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&count=1&language=sv&format=json`
   const res = await fetch(url)
   if (!res.ok) return null
   const data = (await res.json()) as any
@@ -102,36 +102,36 @@ export async function getCurrentWeather(lat: number, lon: number): Promise<Curre
 }
 
 function describeWmo(code: number): string {
-  // Minimal mapping for common codes; fallback to numeric code
+  // Svenska beskrivningar av vanliga WMO‑koder
   const map: Record<number, string> = {
-    0: 'Clear sky',
-    1: 'Mainly clear',
-    2: 'Partly cloudy',
-    3: 'Overcast',
-    45: 'Fog',
-    48: 'Depositing rime fog',
-    51: 'Light drizzle',
-    53: 'Moderate drizzle',
-    55: 'Dense drizzle',
-    56: 'Light freezing drizzle',
-    57: 'Dense freezing drizzle',
-    61: 'Slight rain',
-    63: 'Moderate rain',
-    65: 'Heavy rain',
-    66: 'Light freezing rain',
-    67: 'Heavy freezing rain',
-    71: 'Slight snow fall',
-    73: 'Moderate snow fall',
-    75: 'Heavy snow fall',
-    77: 'Snow grains',
-    80: 'Slight rain showers',
-    81: 'Moderate rain showers',
-    82: 'Violent rain showers',
-    85: 'Slight snow showers',
-    86: 'Heavy snow showers',
-    95: 'Thunderstorm',
-    96: 'Thunderstorm with slight hail',
-    99: 'Thunderstorm with heavy hail',
+    0: 'Klar himmel',
+    1: 'Mest klart',
+    2: 'Halvklart',
+    3: 'Mulet',
+    45: 'Dimma',
+    48: 'Underkyld dimma',
+    51: 'Lätt duggregn',
+    53: 'Måttligt duggregn',
+    55: 'Kraftigt duggregn',
+    56: 'Lätt underkylt duggregn',
+    57: 'Kraftigt underkylt duggregn',
+    61: 'Lätt regn',
+    63: 'Måttligt regn',
+    65: 'Kraftigt regn',
+    66: 'Lätt underkylt regn',
+    67: 'Kraftigt underkylt regn',
+    71: 'Lätt snöfall',
+    73: 'Måttligt snöfall',
+    75: 'Kraftigt snöfall',
+    77: 'Snökorn',
+    80: 'Lätta regnskurar',
+    81: 'Måttliga regnskurar',
+    82: 'Kraftiga regnskurar',
+    85: 'Lätta snöbyar',
+    86: 'Kraftiga snöbyar',
+    95: 'Åska',
+    96: 'Åska med lätt hagel',
+    99: 'Åska med kraftigt hagel',
   }
-  return map[Math.round(code)] ?? `Code ${code}`
+  return map[Math.round(code)] ?? `Kod ${code}`
 }
