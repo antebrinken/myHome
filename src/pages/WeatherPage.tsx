@@ -12,7 +12,7 @@ export default function WeatherPage() {
   const [lastUpdated, setLastUpdated] = useState<number | null>(null)
   const LAST_KEY = 'weather.last.v1'
 
-  async function loadByCoords(lat: number, lon: number, name = 'Your location') {
+  async function loadByCoords(lat: number, lon: number, name = 'Min plats') {
     setLoading(true)
     setError(null)
     try {
@@ -74,7 +74,7 @@ export default function WeatherPage() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords
-        let name = 'Your location'
+        let name = 'Min plats'
         try {
           const place = await reverseGeocode(latitude, longitude)
           if (place) name = place.displayName

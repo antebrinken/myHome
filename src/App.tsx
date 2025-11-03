@@ -81,35 +81,14 @@ function Footer() {
 
 function HomePage() {
   return (
-    <main className="py-16">
-      <div className="max-w-[1100px] mx-auto px-5 grid gap-6">
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
-          <h1 className="text-3xl font-extrabold tracking-tight mb-2">Välkommen till myHome</h1>
-          <p className="text-white/70 max-w-2xl">En ren översikt för din dag: batteristatus, svenska elpriser, kalenderanteckningar med helgdagar, aktuellt väder och en enkel att‑göra‑lista.</p>
-        </div>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
-          <NavLink to="/battery" className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/10">
-            <div className="font-semibold mb-1 flex items-center gap-2"><Battery className="w-4 h-4" /> Battery</div>
-            <div className="text-white/70 text-sm">Check device battery status.</div>
-          </NavLink>
-          <NavLink to="/prices" className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/10">
-            <div className="font-semibold mb-1 flex items-center gap-2"><Bolt className="w-4 h-4" /> Prices</div>
-            <div className="text-white/70 text-sm">SE1–SE4 spot prices and best windows.</div>
-          </NavLink>
-          <NavLink to="/calendar" className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/10">
-            <div className="font-semibold mb-1 flex items-center gap-2"><CalendarIcon className="w-4 h-4" /> Calendar</div>
-            <div className="text-white/70 text-sm">Notes per day + Swedish holidays.</div>
-          </NavLink>
-          <NavLink to="/weather" className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/10">
-            <div className="font-semibold mb-1 flex items-center gap-2"><Cloud className="w-4 h-4" /> Weather</div>
-            <div className="text-white/70 text-sm">City search and my location.</div>
-          </NavLink>
-          <NavLink to="/todo" className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/10">
-            <div className="font-semibold mb-1 flex items-center gap-2"><ListTodo className="w-4 h-4" /> Todo</div>
-            <div className="text-white/70 text-sm">Simple tasks for your day.</div>
-          </NavLink>
-        </div>
-      </div>
+    <main className="min-h-screen flex flex-col">
+      {/* Hero: text follows scroll (sticky near top) then disappears under the black block */}
+      <section className="relative z-0">
+        <div className="h-[50vh]" />
+        <h1 className="sticky top-16 text-4xl sm:text-5xl font-extrabold tracking-tight px-5 text-center">Välkommen hem</h1>
+      </section>
+
+      
     </main>
   )
 }

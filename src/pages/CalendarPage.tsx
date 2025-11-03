@@ -59,14 +59,51 @@ export default function CalendarPage() {
 
   return (
     <Page id="calendar">
-      <h2 className="text-2xl mb-4">Calendar</h2>
+      <h2 className="text-2xl mb-4">Kalender</h2>
       <Card className="overflow-visible">
         <div className="p-3 border-b border-white/10 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <button aria-label="Previous month" className="rounded-md border border-white/20 bg-white/5 px-2 py-1 hover:bg-white/10" onClick={() => { setSelected(null); setViewMonth((m) => { if (m === 0) { setViewYear((y) => y - 1); return 11 } return m - 1 }) }}>◀</button>
-            <button aria-label="Next month" className="rounded-md border border-white/20 bg-white/5 px-2 py-1 hover:bg-white/10" onClick={() => { setSelected(null); setViewMonth((m) => { if (m === 11) { setViewYear((y) => y + 1); return 0 } return m + 1 }) }}>▶</button>
+            <button
+              aria-label="Previous month"
+              className="rounded-md border border-white/20 bg-white/5 px-2 py-1 hover:bg-white/10"
+              onClick={() => {
+                setSelected(null)
+                const m = viewMonth
+                const y = viewYear
+                if (m === 0) {
+                  setViewMonth(11)
+                  setViewYear(y - 1)
+                } else {
+                  setViewMonth(m - 1)
+                }
+              }}
+            >
+              ◀
+            </button>
+            <button
+              aria-label="Next month"
+              className="rounded-md border border-white/20 bg-white/5 px-2 py-1 hover:bg-white/10"
+              onClick={() => {
+                setSelected(null)
+                const m = viewMonth
+                const y = viewYear
+                if (m === 11) {
+                  setViewMonth(0)
+                  setViewYear(y + 1)
+                } else {
+                  setViewMonth(m + 1)
+                }
+              }}
+            >
+              ▶
+            </button>
           </div>
-          <div className="font-bold">{new Date(viewYear, viewMonth, 1).toLocaleString(undefined, { month: 'long' })} {viewYear}</div>
+          <div className="font-bold">
+            {(() => {
+              const monthName = new Date(viewYear, viewMonth, 1).toLocaleString(undefined, { month: 'long' })
+              return monthName.charAt(0).toUpperCase() + monthName.slice(1)
+            })()} {viewYear}
+          </div>
           <div className="w-[72px]" />
         </div>
         <div className="grid grid-cols-7 bg-white/5 border-b border-white/10">
@@ -105,7 +142,11 @@ export default function CalendarPage() {
         </div>
       </Card>
 
-      <Modal open={!!selected} onClose={() => setSelected(null)} title={selected ? selected.toLocaleDateString('sv-SE', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }) : undefined}>
+      <Modal
+        open={!!selected}
+        onClose={() => setSelected(null)}
+        title={selected ? (() => { const t = selected.toLocaleDateString('sv-SE', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }); return t.charAt(0).toUpperCase() + t.slice(1) })() : undefined}
+      >
         <form className="flex flex-col sm:flex-row gap-2 mb-4" onSubmit={(e) => { e.preventDefault(); if (selected) addEvent(selected) }}>
           <input type="time" className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 w-full sm:w-40" value={time} onChange={(e) => setTime(e.target.value)} required />
           <input type="text" placeholder="Lägg till anteckning…" className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2" value={note} onChange={(e) => setNote(e.target.value)} required />
