@@ -3,8 +3,6 @@ import Page from '../components/Page'
 import Card from '../components/Card'
 import Modal from '../components/Modal'
 import { fetchSwedishHolidays } from '../modules/calendar/holidays'
-import { useAuth } from '../modules/auth/AuthContext'
-import { createEvent as apiCreateEvent, deleteEvent as apiDeleteEvent, fetchEvents as apiFetchEvents } from '../modules/calendar/api'
 
 type DayEvent = { id: string; time: string; text: string }
 
@@ -12,60 +10,13 @@ export default function CalendarPage() {
   const today = useMemo(() => new Date(), [])
   const [viewYear, setViewYear] = useState(today.getFullYear())
   const [viewMonth, setViewMonth] = useState(today.getMonth())
-  const { user } = useAuth()
 
   const STORAGE_KEY = 'calendar.events.v1'
-  const MIGRATED_PREFIX = 'calendar.migrated.v1.user.'
   const [events, setEvents] = useState<Record<string, DayEvent[]>>(() => {
     try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : {} } catch { return {} }
   })
   // Persist to localStorage as a cache/fallback
   useEffect(() => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(events)) } catch {} }, [events])
-
-  // Migrate localStorage events to server on first login, then load server events
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      if (!user) return
-      try {
-        const migratedKey = `${MIGRATED_PREFIX}${user.id}`
-        if (!localStorage.getItem(migratedKey)) {
-          // migrate existing local events
-          try {
-            const raw = localStorage.getItem(STORAGE_KEY)
-            if (raw) {
-              const local: Record<string, DayEvent[]> = JSON.parse(raw)
-              for (const [day, arr] of Object.entries(local)) {
-                for (const ev of arr) {
-                  try {
-                    await apiCreateEvent({ userId: user.id, date: day, time: ev.time, text: ev.text })
-                  } catch {}
-                }
-              }
-            }
-            // Clear old local cache after successful migration trigger
-            try { localStorage.removeItem(STORAGE_KEY) } catch {}
-            localStorage.setItem(migratedKey, '1')
-          } catch {}
-        }
-        const list = await apiFetchEvents(user.id)
-        if (cancelled) return
-        const grouped: Record<string, DayEvent[]> = {}
-        for (const ev of list) {
-          const day = ev.date
-          if (!grouped[day]) grouped[day] = []
-          grouped[day].push({ id: ev.id, time: ev.time, text: ev.text })
-        }
-        // Sort each day by time
-        for (const k of Object.keys(grouped)) grouped[k].sort((a, b) => a.time.localeCompare(b.time))
-        setEvents(grouped)
-      } catch {
-        // ignore server errors, stay on local cache
-      }
-    }
-    load()
-    return () => { cancelled = true }
-  }, [user])
 
   const [selected, setSelected] = useState<Date | null>(null)
   const [note, setNote] = useState('')
@@ -87,27 +38,12 @@ export default function CalendarPage() {
   async function addEvent(date: Date) {
     const k = keyFor(date)
     const trimmed = note.trim(); if (!trimmed || !time) return
-    if (user) {
-      try {
-        const created = await apiCreateEvent({ userId: user.id, date: k, time, text: trimmed })
-        const ev: DayEvent = { id: created.id, time: created.time, text: created.text }
-        setEvents((prev) => { const arr = [...(prev[k] ?? []), ev]; arr.sort((a, b) => a.time.localeCompare(b.time)); return { ...prev, [k]: arr } })
-      } catch {
-        // If server fails, fall back to local add with a temp id
-        const ev: DayEvent = { id: crypto.randomUUID(), time, text: trimmed }
-        setEvents((prev) => { const arr = [...(prev[k] ?? []), ev]; arr.sort((a, b) => a.time.localeCompare(b.time)); return { ...prev, [k]: arr } })
-      }
-    } else {
-      const ev: DayEvent = { id: crypto.randomUUID(), time, text: trimmed }
-      setEvents((prev) => { const arr = [...(prev[k] ?? []), ev]; arr.sort((a, b) => a.time.localeCompare(b.time)); return { ...prev, [k]: arr } })
-    }
+    const ev: DayEvent = { id: crypto.randomUUID(), time, text: trimmed }
+    setEvents((prev) => { const arr = [...(prev[k] ?? []), ev]; arr.sort((a, b) => a.time.localeCompare(b.time)); return { ...prev, [k]: arr } })
     setNote(''); setTime('')
   }
   async function removeEvent(date: Date, id: string) {
     const k = keyFor(date)
-    if (user) {
-      try { await apiDeleteEvent(user.id, id) } catch {}
-    }
     setEvents((prev) => { const arr = (prev[k] ?? []).filter((e) => e.id !== id); const next = { ...prev }; if (arr.length) next[k] = arr; else delete next[k]; return next })
   }
 
