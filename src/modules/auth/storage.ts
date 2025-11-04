@@ -3,6 +3,8 @@ export type UserRecord = {
   email: string
   passwordHash: string
   createdAt: number
+  phone?: string
+  avatarDataUrl?: string
 }
 
 const USERS_KEY = 'app.users.v1'

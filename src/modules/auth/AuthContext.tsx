@@ -2,7 +2,10 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { addUser, findUserByEmail, getSession, getUserById, setSession, updateUser, removeUser, type UserRecord } from './storage'
 import { sha256 } from './crypto'
 
-export type AuthUser = Pick<UserRecord, 'id' | 'email' | 'createdAt'>
+export type AuthUser = Pick<UserRecord, 'id' | 'email' | 'createdAt'> & {
+  phone?: string
+  avatarDataUrl?: string
+}
 
 type AuthContextType = {
   user: AuthUser | null
@@ -12,6 +15,7 @@ type AuthContextType = {
   logout: () => void
   updateEmail: (newEmail: string) => Promise<{ ok: true } | { ok: false; message: string }>
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ ok: true } | { ok: false; message: string }>
+  updateProfile: (data: { phone?: string; avatarDataUrl?: string }) => Promise<{ ok: true } | { ok: false; message: string }>
   deleteAccount: () => Promise<void>
 }
 
@@ -28,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
     const u = getUserById(id)
-    if (u) setUser({ id: u.id, email: u.email, createdAt: u.createdAt })
+    if (u) setUser({ id: u.id, email: u.email, createdAt: u.createdAt, phone: u.phone, avatarDataUrl: u.avatarDataUrl })
     setLoading(false)
   }, [])
 
@@ -45,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     addUser(record)
     setSession(record.id)
-    setUser({ id: record.id, email: record.email, createdAt: record.createdAt })
+    setUser({ id: record.id, email: record.email, createdAt: record.createdAt, phone: record.phone, avatarDataUrl: record.avatarDataUrl })
     return { ok: true as const }
   }, [])
 
@@ -55,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const hash = await sha256(password)
     if (hash !== existing.passwordHash) return { ok: false as const, message: 'Ogiltiga uppgifter.' }
     setSession(existing.id)
-    setUser({ id: existing.id, email: existing.email, createdAt: existing.createdAt })
+    setUser({ id: existing.id, email: existing.email, createdAt: existing.createdAt, phone: existing.phone, avatarDataUrl: existing.avatarDataUrl })
     return { ok: true as const }
   }, [])
 
@@ -74,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!current) return { ok: false as const, message: 'Användaren hittades inte.' }
     const updated: UserRecord = { ...current, email: newEmail }
     updateUser(updated)
-    setUser({ id: updated.id, email: updated.email, createdAt: updated.createdAt })
+    setUser({ id: updated.id, email: updated.email, createdAt: updated.createdAt, phone: updated.phone, avatarDataUrl: updated.avatarDataUrl })
     return { ok: true as const }
   }, [user])
 
@@ -90,6 +94,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { ok: true as const }
   }, [user])
 
+  const updateProfile = useCallback(async (data: { phone?: string; avatarDataUrl?: string }) => {
+    if (!user) return { ok: false as const, message: 'Inte autentiserad.' }
+    const record = getUserById(user.id)
+    if (!record) return { ok: false as const, message: 'Användaren hittades inte.' }
+    const updated: UserRecord = { ...record, phone: data.phone ?? record.phone, avatarDataUrl: data.avatarDataUrl ?? record.avatarDataUrl }
+    updateUser(updated)
+    setUser({ id: updated.id, email: updated.email, createdAt: updated.createdAt, phone: updated.phone, avatarDataUrl: updated.avatarDataUrl })
+    return { ok: true as const }
+  }, [user])
+
   const deleteAccount = useCallback(async () => {
     if (!user) return
     removeUser(user.id)
@@ -97,7 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
   }, [user])
 
-  const value = useMemo<AuthContextType>(() => ({ user, loading, register, login, logout, updateEmail, changePassword, deleteAccount }), [user, loading, register, login, logout, updateEmail, changePassword, deleteAccount])
+  const value = useMemo<AuthContextType>(() => ({ user, loading, register, login, logout, updateEmail, changePassword, updateProfile, deleteAccount }), [user, loading, register, login, logout, updateEmail, changePassword, updateProfile, deleteAccount])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

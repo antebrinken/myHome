@@ -1,7 +1,7 @@
  
 import { useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
-import { Battery, Calendar as CalendarIcon, Cloud, ListTodo, Bolt, Mail, Phone, Menu, X } from 'lucide-react'
+import { Battery, Calendar as CalendarIcon, Cloud, ListTodo, Bolt, Mail, Phone, Menu, X, User as UserIcon } from 'lucide-react'
 import Hero from '@/components/ui/neural-network-hero'
 import NeuralNetworkBackground from '@/components/ui/neural-network-background'
 import LoginPage from './pages/Login'
@@ -22,6 +22,7 @@ import TodoPage from './pages/TodoPage'
 function Header() {
   const { user, logout } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   return (
     <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur border-b border-white/10">
       <div className="max-w-[1100px] mx-auto px-5 h-16 flex items-center justify-between">
@@ -43,22 +44,53 @@ function Header() {
             </>
           )}
           {user && (
-            <>
-              <NavLink className="px-3 py-2 rounded-md hover:bg-white/10" to="/profile">Profil</NavLink>
-              <NavLink className="px-3 py-2 rounded-md hover:bg-white/10" to="/settings">Inställningar</NavLink>
-              <button onClick={logout} className="px-3 py-2 rounded-md hover:bg-white/10">Logga ut</button>
-            </>
+            <div className="relative flex items-center">
+              <button
+                className="group w-8 h-8 rounded-full border border-white/20 bg-gradient-to-br from-indigo-600/40 to-sky-500/30 flex items-center justify-center text-sm font-semibold text-white/90 hover:ring-2 hover:ring-white/20"
+                aria-label="Öppna användarmeny"
+                aria-expanded={userMenuOpen}
+                onClick={() => setUserMenuOpen((v) => !v)}
+              >
+                {user.avatarDataUrl ? (
+                  <img src={user.avatarDataUrl} alt="Avatar" className="w-8 h-8 rounded-full object-cover" />
+                ) : (
+                  user.email ? user.email.charAt(0).toUpperCase() : <UserIcon className="w-4 h-4" />
+                )}
+              </button>
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-44 rounded-md border border-white/10 bg-slate-900/95 backdrop-blur shadow-lg">
+                  <div className="py-1">
+                    <NavLink className="block px-3 py-2 rounded-md hover:bg-white/10" to="/profile" onClick={() => setUserMenuOpen(false)}>Profil</NavLink>
+                    <NavLink className="block px-3 py-2 rounded-md hover:bg-white/10" to="/settings" onClick={() => setUserMenuOpen(false)}>Inställningar</NavLink>
+                    <button onClick={() => { logout(); setUserMenuOpen(false) }} className="block w-full text-left px-3 py-2 rounded-md hover:bg-white/10">Logga ut</button>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </nav>
-        {/* Mobile hamburger */}
-        <button
-          className="sm:hidden p-2 rounded-md hover:bg-white/10"
-          aria-label="Öppna meny"
-          aria-expanded={mobileOpen}
-          onClick={() => setMobileOpen((v) => !v)}
-        >
-          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        {/* Mobile actions: hamburger + avatar */}
+        <div className="sm:hidden flex items-center gap-2">
+          <button
+            className="p-2 rounded-md hover:bg-white/10"
+            aria-label="Öppna meny"
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+          {user && (
+            <NavLink to="/profile" aria-label="Profil">
+              <div className="w-8 h-8 rounded-full border border-white/20 bg-gradient-to-br from-indigo-600/40 to-sky-500/30 flex items-center justify-center text-sm font-semibold text-white/90 overflow-hidden">
+                {user.avatarDataUrl ? (
+                  <img src={user.avatarDataUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  user.email ? user.email.charAt(0).toUpperCase() : <UserIcon className="w-4 h-4" />
+                )}
+              </div>
+            </NavLink>
+          )}
+        </div>
       </div>
       {/* Mobile menu panel */}
       {mobileOpen && (
