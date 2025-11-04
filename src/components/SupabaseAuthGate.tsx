@@ -1,12 +1,23 @@
-import { useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '@/modules/supabase/client'
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 
-type Session = Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session']
+type MaybeSession = Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session']
+type Session = NonNullable<MaybeSession>
+
+const SupabaseSessionContext = createContext<Session | null>(null)
+
+export function useSupabaseSession(): Session {
+  const session = useContext(SupabaseSessionContext)
+  if (!session) {
+    throw new Error('useSupabaseSession must be used within SupabaseAuthGate')
+  }
+  return session
+}
 
 export default function SupabaseAuthGate({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session>(null)
+  const [session, setSession] = useState<MaybeSession>(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -28,7 +39,11 @@ export default function SupabaseAuthGate({ children }: { children: React.ReactNo
     )
   }
 
-  return <>{children}</>
+  return (
+    <SupabaseSessionContext.Provider value={session}>
+      {children}
+    </SupabaseSessionContext.Provider>
+  )
 }
 
 

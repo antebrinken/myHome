@@ -8,6 +8,7 @@ import http from 'http'
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
+import { createClient } from '@supabase/supabase-js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -15,6 +16,20 @@ const __dirname = dirname(__filename)
 const DATA_DIR = join(__dirname, 'data')
 const EVENTS_FILE = join(DATA_DIR, 'events.json')
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3001
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || ''
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+
+let supabaseAdmin = null
+if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+  supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  })
+} else {
+  console.warn('[server] SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set. Account deletion will be disabled.')
+}
 
 function ensureStore() {
   if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true })
@@ -114,4 +129,32 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`Calendar server running on http://localhost:${PORT}`)
 })
+    if (req.method === 'DELETE' && path === '/api/account') {
+      if (!supabaseAdmin) return sendJson(res, 503, { error: 'Account deletion is not configured.' })
+      const authHeader = req.headers.authorization || ''
+      const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+      if (!token) return sendJson(res, 401, { error: 'Authorization token missing.' })
+
+      const { data: { user }, error: getUserError } = await supabaseAdmin.auth.getUser(token)
+      if (getUserError || !user) {
+        return sendJson(res, 401, { error: 'Invalid or expired session.' })
+      }
+
+      const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id)
+      if (deleteError) {
+        console.error('[server] Failed to delete user', deleteError)
+        return sendJson(res, 500, { error: 'Could not delete user.' })
+      }
+
+      try {
+        const events = readEvents()
+        const filtered = events.filter((event) => event.userId !== user.id)
+        writeEvents(filtered)
+      } catch (cleanupError) {
+        console.warn('[server] Failed to clean up user events', cleanupError)
+        // continue, deletion already succeeded
+      }
+
+      return sendJson(res, 200, { ok: true })
+    }
 

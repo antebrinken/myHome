@@ -1,7 +1,6 @@
- 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
-import { Battery, Calendar as CalendarIcon, Cloud, Home, Bolt, Mail, Phone, Menu, X } from 'lucide-react'
+import { Battery, Calendar as CalendarIcon, Cloud, Home, Bolt, Mail, Phone, Menu, X, User, Settings, LogOut } from 'lucide-react'
 import Hero from '@/components/ui/neural-network-hero'
 import NeuralNetworkBackground from '@/components/ui/neural-network-background'
 import NotFoundPage from './pages/NotFound'
@@ -10,12 +9,61 @@ import PricesPage from './pages/PricesPage'
 import CalendarPage from './pages/CalendarPage'
 import WeatherPage from './pages/WeatherPage'
 import HomeControlPage from './pages/HomeControlPage'
-import SupabaseAuthGate from '@/components/SupabaseAuthGate'
+import SupabaseAuthGate, { useSupabaseSession } from '@/components/SupabaseAuthGate'
+import { ProfileProvider, useProfile } from '@/modules/profile/ProfileContext'
+import { supabase } from '@/modules/supabase/client'
+import ProfilePage from './pages/ProfilePage'
+import SettingsPage from './pages/SettingsPage'
 
  
 
 function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileMenuRef = useRef<HTMLDivElement | null>(null)
+  const session = useSupabaseSession()
+  const { avatarDataUrl } = useProfile()
+  const userEmail = session.user?.email ?? 'Profile'
+  const initials = userEmail.slice(0, 1).toUpperCase()
+  const avatarDimension = 48
+
+  const AvatarCircle = ({ dimension }: { dimension: number }) => (
+    avatarDataUrl ? (
+      <img
+        src={avatarDataUrl}
+        alt="Profile avatar"
+        className="rounded-full border border-indigo-400/50 object-cover"
+        style={{ width: dimension, height: dimension }}
+      />
+    ) : (
+      <div
+        className="flex items-center justify-center rounded-full border border-indigo-400/50 bg-indigo-500/20 text-sm font-semibold"
+        style={{ width: dimension, height: dimension }}
+      >
+        {initials}
+      </div>
+    )
+  )
+
+  useEffect(() => {
+    if (!profileOpen) {
+      return
+    }
+    function handleClick(event: MouseEvent) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setProfileOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [profileOpen])
+
+  async function handleLogout() {
+    setProfileOpen(false)
+    setMobileOpen(false)
+    await supabase.auth.signOut()
+  }
+
   return (
     <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur border-b border-white/10">
       <div className="max-w-[1100px] mx-auto px-5 h-16 flex items-center justify-between">
@@ -23,15 +71,51 @@ function Header() {
           <Bolt className="w-5 h-5" /> Hem
         </NavLink>
         {/* Desktop nav */}
-        <nav className="hidden sm:flex gap-3 text-sm items-center">
+        <nav className="hidden sm:flex gap-3 text-sm items-center ml-auto">
           <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/battery"><Battery className="w-4 h-4" /> Batteri</NavLink>
           <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/prices"><Bolt className="w-4 h-4" /> Priser</NavLink>
           <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/calendar"><CalendarIcon className="w-4 h-4" /> Kalender</NavLink>
           <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/weather"><Cloud className="w-4 h-4" /> Väder</NavLink>
           <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/home"><Home className="w-4 h-4" /> Hemma</NavLink>
         </nav>
+        <div className="hidden sm:flex items-center gap-3 ml-4">
+          <div className="relative" ref={profileMenuRef}>
+            <button
+              className="flex items-center gap-2 rounded-full p-1 hover:bg-white/10"
+              aria-haspopup="menu"
+              aria-expanded={profileOpen}
+              onClick={() => setProfileOpen((v) => !v)}
+            >
+              <AvatarCircle dimension={avatarDimension} />
+            </button>
+            {profileOpen && (
+              <div className="absolute right-0 mt-2 w-48 rounded-lg border border-white/10 bg-slate-900/95 p-1 text-sm shadow-lg backdrop-blur">
+                <NavLink
+                  to="/profile"
+                  className="flex items-center gap-2 rounded-md px-3 py-2 hover:bg-white/10"
+                  onClick={() => setProfileOpen(false)}
+                >
+                  <User className="w-4 h-4" /> Profile
+                </NavLink>
+                <NavLink
+                  to="/settings"
+                  className="flex items-center gap-2 rounded-md px-3 py-2 hover:bg-white/10"
+                  onClick={() => setProfileOpen(false)}
+                >
+                  <Settings className="w-4 h-4" /> Settings
+                </NavLink>
+                <button
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left hover:bg-white/10"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="w-4 h-4" /> Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
         {/* Mobile actions: hamburger + avatar */}
-        <div className="sm:hidden flex items-center gap-2">
+        <div className="sm:hidden flex items-center gap-2 ml-auto">
           <button
             className="p-2 rounded-md hover:bg-white/10"
             aria-label="Öppna meny"
@@ -40,6 +124,7 @@ function Header() {
           >
             {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
+          <AvatarCircle dimension={40} />
         </div>
       </div>
       {/* Mobile menu panel */}
@@ -51,6 +136,12 @@ function Header() {
             <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/calendar" onClick={() => setMobileOpen(false)}><CalendarIcon className="w-4 h-4" /> Kalender</NavLink>
             <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/weather" onClick={() => setMobileOpen(false)}><Cloud className="w-4 h-4" /> Väder</NavLink>
             <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/home" onClick={() => setMobileOpen(false)}><Home className="w-4 h-4" /> Hemma</NavLink>
+            <div className="mt-4 border-t border-white/10 pt-3 flex flex-col gap-1">
+              <span className="px-3 text-xs font-semibold uppercase tracking-wide text-white/40">Profile</span>
+              <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/profile" onClick={() => setMobileOpen(false)}><User className="w-4 h-4" /> Profile</NavLink>
+              <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/settings" onClick={() => setMobileOpen(false)}><Settings className="w-4 h-4" /> Settings</NavLink>
+              <button className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2 text-left" onClick={handleLogout}><LogOut className="w-4 h-4" /> Logout</button>
+            </div>
           </div>
         </div>
       )}
@@ -166,19 +257,23 @@ function App() {
     <div id="top" className="min-h-screen flex flex-col">
       <NeuralNetworkBackground />
       <SupabaseAuthGate>
-        <Header />
-        <div className="flex-1">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/battery" element={<BatteryPage />} />
-            <Route path="/prices" element={<PricesPage />} />
-            <Route path="/calendar" element={<CalendarPage />} />
-            <Route path="/weather" element={<WeatherPage />} />
-            <Route path="/home" element={<HomeControlPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </div>
-        <Footer />
+        <ProfileProvider>
+          <Header />
+          <div className="flex-1">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/battery" element={<BatteryPage />} />
+              <Route path="/prices" element={<PricesPage />} />
+              <Route path="/calendar" element={<CalendarPage />} />
+              <Route path="/weather" element={<WeatherPage />} />
+              <Route path="/home" element={<HomeControlPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </div>
+          <Footer />
+        </ProfileProvider>
       </SupabaseAuthGate>
     </div>
   )

@@ -6,6 +6,7 @@ type RoomKey = 'Kök' | 'Vardagsrum' | 'Sovrum'
 
 function RoomCard({ name }: { name: RoomKey }) {
   const [lamps, setLamps] = useState([false, false, false, false])
+  const allOff = lamps.every((lamp) => !lamp)
 
   function setAll(on: boolean) {
     setLamps([on, on, on, on])
@@ -28,7 +29,12 @@ function RoomCard({ name }: { name: RoomKey }) {
           <button
             key={i}
             onClick={() => toggleOne(i)}
-            className={`rounded-lg border px-3 py-3 text-sm text-left transition-colors ${on ? 'bg-indigo-600/30 border-indigo-400/50' : 'bg-white/5 border-white/20 hover:bg-white/10'}`}
+            className={`rounded-lg border px-3 py-3 text-sm text-left transition-colors ${on
+              ? 'bg-indigo-600/30 border-indigo-400/50'
+              : allOff
+                ? 'bg-red-600/30 border-red-400/50'
+                : 'bg-white/5 border-white/20 hover:bg-white/10'
+            }`}
             aria-pressed={on}
           >
             <div className="font-medium">Lampa {i + 1}</div>
@@ -53,4 +59,3 @@ export default function HomeControlPage() {
     </Page>
   )
 }
-
