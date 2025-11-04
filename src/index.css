@@ -51,6 +51,13 @@ body::before {
   opacity: 0.35;
 }
 
+/* Reusable section background matching the page gradient */
+.section-gradient {
+  @apply bg-gradient-to-br from-black via-emerald-950 to-black;
+}
+
+/* (removed) Blue variant for glass card internals */
+
 /* Mobile refinements */
 @media (max-width: 640px) {
   .glass-card { padding: 1rem 1rem; border-radius: 0.875rem; }

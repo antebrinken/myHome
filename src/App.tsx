@@ -9,7 +9,6 @@ import SettingsPage from './pages/Settings'
 import NotFoundPage from './pages/NotFound'
 import ProtectedRoute from './components/ProtectedRoute'
 import { useAuth } from './modules/auth/AuthContext'
-// Pages extracted
 import BatteryPage from './pages/BatteryPage'
 import PricesPage from './pages/PricesPage'
 import CalendarPage from './pages/CalendarPage'
@@ -112,7 +111,7 @@ function Footer() {
             <a className="hover:underline inline-flex items-center gap-2" href="mailto:antebrinken@live.se"><Mail className="w-4 h-4" /> antebrinken@live.se</a>
             <a className="hover:underline inline-flex items-center gap-2" href="tel:+46734177109"><Phone className="w-4 h-4" /> 0734177109</a>
           </div>
-          <a href="#top" className="text-sm sm:text-base hover:underline">Till toppen</a>
+         
         </div>
       </div>
     </footer>
@@ -135,7 +134,6 @@ function HomePage() {
       <section id="about" className="min-h-screen flex items-center py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-5 w-full">
           <div className="relative glass-card reveal-left max-w-[700px]">
-            <span className="accent-blob -left-10 -top-8 w-40 h-40 sm:w-72 sm:h-72 rounded-full bg-emerald-500/30" />
             <h2 className="text-2xl sm:text-3xl font-bold mb-3">Om sidan</h2>
             <p className="text-white/70 text-sm sm:text-base">Detta är en samlingssida för olika typer av hjälpredor för en framtida Home Assistant..</p>
           </div>
@@ -145,7 +143,6 @@ function HomePage() {
       <section id="battery" className="min-h-screen flex items-center py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-5 w-full">
           <div className="relative glass-card reveal-right max-w-[700px] sm:ml-auto">
-            <span className="accent-blob -right-10 -top-8 w-40 h-40 sm:w-72 sm:h-72 rounded-full bg-cyan-500/30" />
             <h2 className="text-2xl sm:text-3xl font-bold mb-3">Batteri</h2>
             <p className="text-white/70 text-sm sm:text-base mb-3">Här kommer man kunna se olika enheters batteriprocenter.</p>
             <NavLink to="/battery" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm sm:text-base hover:bg-white/20">Gå till Batteri</NavLink>
@@ -156,7 +153,6 @@ function HomePage() {
       <section id="prices" className="min-h-screen flex items-center py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-5 w-full">
           <div className="relative glass-card reveal-left max-w-[700px]">
-            <span className="accent-blob -left-10 -top-8 w-40 h-40 sm:w-72 sm:h-72 rounded-full bg-blue-500/30" />
             <h2 className="text-2xl sm:text-3xl font-bold mb-3">Elpriser</h2>
             <p className="text-white/70 text-sm sm:text-base mb-3">Se SE1–SE4 spotpriser i realtid och hitta bästa fönster för förbrukning och försäljning.</p>
             <NavLink to="/prices" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm sm:text-base hover:bg-white/20">Gå till Priser</NavLink>
@@ -167,7 +163,6 @@ function HomePage() {
       <section id="calendar" className="min-h-screen flex items-center py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-5 w-full">
           <div className="relative glass-card reveal-right max-w-[700px] sm:ml-auto">
-            <span className="accent-blob -right-10 -top-8 w-40 h-40 sm:w-72 sm:h-72 rounded-full bg-pink-500/30" />
             <h2 className="text-2xl sm:text-3xl font-bold mb-3">Kalender</h2>
             <p className="text-white/70 text-sm sm:text-base mb-3">En samlingssida för en gemensam kalender.</p>
             <NavLink to="/calendar" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm sm:text-base hover:bg-white/20">Gå till Kalender</NavLink>
@@ -178,7 +173,6 @@ function HomePage() {
       <section id="weather" className="min-h-screen flex items-center py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-5 w-full">
           <div className="relative glass-card reveal-left max-w-[700px]">
-            <span className="accent-blob -left-10 -top-8 w-40 h-40 sm:w-72 sm:h-72 rounded-full bg-indigo-500/30" />
             <h2 className="text-2xl sm:text-3xl font-bold mb-3">Väder</h2>
             <p className="text-white/70 text-sm sm:text-base mb-3">Enkelt att kunna se väder via Open‑Meteo.</p>
             <NavLink to="/weather" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm sm:text-base hover:bg-white/20">Gå till Väder</NavLink>
@@ -189,7 +183,6 @@ function HomePage() {
       <section id="todo" className="min-h-screen flex items-center py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-5 w-full">
           <div className="relative glass-card reveal-right max-w-[700px] sm:ml-auto">
-            <span className="accent-blob -right-10 -top-8 w-40 h-40 sm:w-72 sm:h-72 rounded-full bg-amber-500/30" />
             <h2 className="text-2xl sm:text-3xl font-bold mb-3">Att göra</h2>
             <p className="text-white/70 text-sm sm:text-base mb-3">Håll koll på små uppgifter med en enkel och snabb lista.</p>
             <NavLink to="/todo" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm sm:text-base hover:bg-white/20">Gå till Att göra</NavLink>
