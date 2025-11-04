@@ -2,6 +2,8 @@
 import { useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
 import { Battery, Calendar as CalendarIcon, Cloud, ListTodo, Bolt, Mail, Phone, Menu, X } from 'lucide-react'
+import Hero from '@/components/ui/neural-network-hero'
+import NeuralNetworkBackground from '@/components/ui/neural-network-background'
 import LoginPage from './pages/Login'
 import RegisterPage from './pages/Register'
 import ProfilePage from './pages/Profile'
@@ -121,13 +123,9 @@ function Footer() {
 function HomePage() {
   return (
     <main className="min-h-screen flex flex-col">
-      {/* Hero: text follows scroll (sticky near top) then disappears under the black block */}
-      <section className="relative z-0">
-        <div className="h-[50vh]" />
-        <div className="sticky top-16 px-5 text-center">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">Välkommen hem</h1>
-          <p className="mt-2 text-white/70 text-sm sm:text-base">Här ska det stå något smart</p>
-        </div>
+      {/* Hero */}
+      <section className="relative z-0 min-h-[70vh]">
+        <Hero title="Välkommen hem" centered />
       </section>
 
       {/* Info sections */}
@@ -198,6 +196,7 @@ function HomePage() {
 function App() {
   return (
     <div id="top" className="min-h-screen flex flex-col">
+      <NeuralNetworkBackground />
       <Header />
       <div className="flex-1">
         <Routes>
@@ -222,6 +221,3 @@ function App() {
 }
 
 export default App
-
-
-

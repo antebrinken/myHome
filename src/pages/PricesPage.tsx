@@ -64,43 +64,24 @@ export default function PricesPage() {
     <Page id="prices">
       <h2 className="text-2xl mb-4">Elspotpriser (Sverige)</h2>
       <div className="text-white/70 text-sm mb-4">Datum (Stockholm): {dateLabel}</div>
-      <div className="mb-3 flex items-center gap-2">
-        <span className="text-sm text-white/60">Elområde:</span>
-        {(['SE1','SE2','SE3','SE4'] as const).map((z) => (
-          <button key={z} onClick={() => setSelectedZone(z)} title={`${z}: ${ZONE_LABEL[z]}`}
-            className={`text-sm rounded-md px-3 py-1 border ${selectedZone === z ? 'bg-indigo-600/30 border-indigo-400/50' : 'bg-white/5 border-white/20 hover:bg-white/10'}`}>
-            {z}
-          </button>
-        ))}
-        <label className="ml-3 inline-flex items-center gap-2 text-sm">
-          <input type="checkbox" className="accent-emerald-500" checked={includeVAT} onChange={(e) => setIncludeVAT(e.target.checked)} />
-          Inkl. moms 25 %
-        </label>
-        <div className="ml-auto">
+      <div className="mb-3 grid gap-2 sm:flex sm:items-center sm:flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm text-white/60">Elområde:</span>
+          {(['SE1','SE2','SE3','SE4'] as const).map((z) => (
+            <button key={z} onClick={() => setSelectedZone(z)} title={`${z}: ${ZONE_LABEL[z]}`}
+              className={`text-sm rounded-md px-3 py-1 border ${selectedZone === z ? 'bg-indigo-600/30 border-indigo-400/50' : 'bg-white/5 border-white/20 hover:bg-white/10'}`}>
+              {z}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 flex-wrap sm:ml-3">
+          <label className="inline-flex items-center gap-2 text-sm">
+            <input type="checkbox" className="accent-emerald-500" checked={includeVAT} onChange={(e) => setIncludeVAT(e.target.checked)} />
+            Inkl. moms 25 %
+          </label>
           <button onClick={() => setShowTable((v) => !v)} className="text-sm rounded-md px-3 py-1 border bg-white/5 border-white/20 hover:bg-white/10">
             {showTable ? 'Dölj timpriser' : 'Visa timpriser'}
           </button>
-          <button onClick={() => {
-              const vat = includeVAT ? 1.25 : 1
-              const lines = [["Time","SE1","SE2","SE3","SE4"].join(',')]
-              rows.forEach(r => {
-                const vals = [r.time,
-                  r.SE1!=null ? (r.SE1*vat).toFixed(3) : '',
-                  r.SE2!=null ? (r.SE2*vat).toFixed(3) : '',
-                  r.SE3!=null ? (r.SE3*vat).toFixed(3) : '',
-                  r.SE4!=null ? (r.SE4*vat).toFixed(3) : '',
-                ]
-                lines.push(vals.join(','))
-              })
-              const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
-              const url = URL.createObjectURL(blob)
-              const a = document.createElement('a')
-              a.href = url
-              a.download = `elspot_${dateLabel.replace(/\//g,'-')}${includeVAT?'_inclVAT':''}.csv`
-              a.click()
-              URL.revokeObjectURL(url)
-            }}
-            className="ml-2 text-sm rounded-md px-3 py-1 border bg-white/5 border-white/20 hover:bg-white/10">Exportera CSV</button>
         </div>
       </div>
       {loading && (

@@ -5,8 +5,8 @@
 html, body, #root { height: 100%; }
 /* Global gradient background */
 body {
-  /* Black → Green with a subtle warm accent */
-  @apply text-slate-100 bg-gradient-to-br from-black via-emerald-950 to-black;
+  /* Black → Blue to match hero */
+  @apply text-slate-100 bg-gradient-to-br from-black via-indigo-950 to-black;
   background-attachment: fixed;
 }
 
@@ -17,12 +17,12 @@ body::before {
   inset: 0;
   pointer-events: none;
   background:
-    /* Primary emerald glow */
-    radial-gradient(900px 500px at 50% 120%, rgba(16, 185, 129, 0.16), transparent 60%),
-    /* Tiny pink accent */
-    radial-gradient(700px 350px at 110% 0%, rgba(236, 72, 153, 0.08), transparent 62%),
-    /* Very subtle red accent */
-    radial-gradient(600px 300px at -5% 20%, rgba(244, 63, 94, 0.06), transparent 65%);
+    /* Primary blue glow */
+    radial-gradient(900px 500px at 50% 120%, rgba(59, 130, 246, 0.16), transparent 60%),
+    /* Indigo accent */
+    radial-gradient(700px 350px at 110% 0%, rgba(99, 102, 241, 0.10), transparent 62%),
+    /* Cyan accent */
+    radial-gradient(600px 300px at -5% 20%, rgba(56, 189, 248, 0.08), transparent 65%);
 }
 
 /* Hero/section presentation helpers */
