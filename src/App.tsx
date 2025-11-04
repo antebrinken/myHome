@@ -1,7 +1,7 @@
  
 import { useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
-import { Battery, Calendar as CalendarIcon, Cloud, ListTodo, Bolt, Mail, Phone, Menu, X, User as UserIcon } from 'lucide-react'
+import { Battery, Calendar as CalendarIcon, Cloud, Home, Bolt, Mail, Phone, Menu, X, User as UserIcon } from 'lucide-react'
 import Hero from '@/components/ui/neural-network-hero'
 import NeuralNetworkBackground from '@/components/ui/neural-network-background'
 import LoginPage from './pages/Login'
@@ -15,7 +15,8 @@ import BatteryPage from './pages/BatteryPage'
 import PricesPage from './pages/PricesPage'
 import CalendarPage from './pages/CalendarPage'
 import WeatherPage from './pages/WeatherPage'
-import TodoPage from './pages/TodoPage'
+// import TodoPage from './pages/TodoPage'
+import HomeControlPage from './pages/HomeControlPage'
 
  
 
@@ -35,7 +36,7 @@ function Header() {
           <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/prices"><Bolt className="w-4 h-4" /> Priser</NavLink>
           <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/calendar"><CalendarIcon className="w-4 h-4" /> Kalender</NavLink>
           <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/weather"><Cloud className="w-4 h-4" /> Väder</NavLink>
-          <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/todo"><ListTodo className="w-4 h-4" /> Att göra</NavLink>
+          <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/home"><Home className="w-4 h-4" /> Hemma</NavLink>
           <span className="mx-2 opacity-30">|</span>
           {!user && (
             <>
@@ -100,7 +101,7 @@ function Header() {
             <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/prices" onClick={() => setMobileOpen(false)}><Bolt className="w-4 h-4" /> Priser</NavLink>
             <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/calendar" onClick={() => setMobileOpen(false)}><CalendarIcon className="w-4 h-4" /> Kalender</NavLink>
             <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/weather" onClick={() => setMobileOpen(false)}><Cloud className="w-4 h-4" /> Väder</NavLink>
-            <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/todo" onClick={() => setMobileOpen(false)}><ListTodo className="w-4 h-4" /> Att göra</NavLink>
+            <NavLink className="px-3 py-2 rounded-md hover:bg-white/10 flex items-center gap-2" to="/home" onClick={() => setMobileOpen(false)}><Home className="w-4 h-4" /> Hemma</NavLink>
             <div className="h-px bg-white/10 my-2" />
             {!user && (
               <>
@@ -210,12 +211,12 @@ function HomePage() {
         </div>
       </section>
 
-      <section id="todo" className="min-h-screen flex items-center py-16 sm:py-24">
+      <section id="home" className="min-h-screen flex items-center py-16 sm:py-24">
         <div className="max-w-[1100px] mx-auto px-5 w-full">
           <div className="relative glass-card reveal-right max-w-[700px] sm:ml-auto">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Att göra</h2>
-            <p className="text-white/70 text-sm sm:text-base mb-3">Håll koll på små uppgifter med en enkel och snabb lista.</p>
-            <NavLink to="/todo" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm sm:text-base hover:bg-white/20">Gå till Att göra</NavLink>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Hemma</h2>
+            <p className="text-white/70 text-sm sm:text-base mb-3">Styr lampor i olika rum. Detta är en förhandsvy av en kommande funktion.</p>
+            <NavLink to="/home" className="inline-block mt-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm sm:text-base hover:bg-white/20">Gå till Hemma</NavLink>
           </div>
         </div>
       </section>
@@ -237,7 +238,7 @@ function App() {
           <Route path="/prices" element={<PricesPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/weather" element={<WeatherPage />} />
-          <Route path="/todo" element={<TodoPage />} />
+          <Route path="/home" element={<HomeControlPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route element={<ProtectedRoute />}>

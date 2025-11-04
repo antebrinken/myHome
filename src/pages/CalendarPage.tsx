@@ -125,7 +125,7 @@ export default function CalendarPage() {
 
   return (
     <Page id="calendar">
-      <h2 className="text-2xl mb-4">Kalender</h2>
+      <h2 className="text-2xl mb-4"></h2>
       <Card className="overflow-visible">
         <div className="p-3 border-b border-white/10 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
