@@ -99,7 +99,7 @@ export default function SettingsPage() {
       </section>
 
       <section className="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-5">
-        <h2 className="text-xl mb-2 text-rose-300">Farlig zon</h2>
+        <h2 className="text-xl mb-2 text-rose-300">Radera konto</h2>
         <p className="text-sm text-white/70 mb-3">Detta kommer permanent att ta bort ditt konto och lokalt lagrad data.</p>
         <button className="rounded-lg border border-rose-500/40 bg-rose-500/20 px-4 py-2 hover:bg-rose-500/30" onClick={onDelete}>Ta bort konto</button>
       </section>
