@@ -15,7 +15,6 @@ import BatteryPage from './pages/BatteryPage'
 import PricesPage from './pages/PricesPage'
 import CalendarPage from './pages/CalendarPage'
 import WeatherPage from './pages/WeatherPage'
-// import TodoPage from './pages/TodoPage'
 import HomeControlPage from './pages/HomeControlPage'
 
  
@@ -28,7 +27,7 @@ function Header() {
     <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur border-b border-white/10">
       <div className="max-w-[1100px] mx-auto px-5 h-16 flex items-center justify-between">
         <NavLink to="/" className="font-extrabold tracking-tight flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-          <Bolt className="w-5 h-5" /> myHome
+          <Bolt className="w-5 h-5" /> Hem
         </NavLink>
         {/* Desktop nav */}
         <nav className="hidden sm:flex gap-3 text-sm items-center">
@@ -158,7 +157,7 @@ function HomePage() {
     <main className="min-h-screen flex flex-col">
       {/* Hero */}
       <section className="relative z-0 min-h-[70vh]">
-        <Hero title="Välkommen hem" centered />
+        <Hero title="Min framtida app" centered />
       </section>
 
       {/* Info sections */}
