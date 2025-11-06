@@ -116,19 +116,6 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { ok: true })
     }
 
-    if (path === '/health') { res.writeHead(200); res.end('ok'); return }
-
-    res.writeHead(404)
-    res.end('Not Found')
-  } catch (e) {
-    console.error('Server error', e)
-    sendJson(res, 500, { error: 'Internal Server Error' })
-  }
-})
-
-server.listen(PORT, () => {
-  console.log(`Calendar server running on http://localhost:${PORT}`)
-})
     if (req.method === 'DELETE' && path === '/api/account') {
       if (!supabaseAdmin) return sendJson(res, 503, { error: 'Account deletion is not configured.' })
       const authHeader = req.headers.authorization || ''
@@ -146,6 +133,14 @@ server.listen(PORT, () => {
         return sendJson(res, 500, { error: 'Could not delete user.' })
       }
 
+      const avatarPath = user.user_metadata?.avatar_path
+      if (avatarPath) {
+        await supabaseAdmin.storage
+          .from('SupaBucket')
+          .remove([avatarPath])
+          .catch((storageError) => console.warn('[server] Failed to remove avatar', storageError))
+      }
+
       try {
         const events = readEvents()
         const filtered = events.filter((event) => event.userId !== user.id)
@@ -158,3 +153,16 @@ server.listen(PORT, () => {
       return sendJson(res, 200, { ok: true })
     }
 
+    if (path === '/health') { res.writeHead(200); res.end('ok'); return }
+
+    res.writeHead(404)
+    res.end('Not Found')
+  } catch (e) {
+    console.error('Server error', e)
+    sendJson(res, 500, { error: 'Internal Server Error' })
+  }
+})
+
+server.listen(PORT, () => {
+  console.log(`Calendar server running on http://localhost:${PORT}`)
+})

@@ -22,15 +22,22 @@ function Header() {
   const [profileOpen, setProfileOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement | null>(null)
   const session = useSupabaseSession()
-  const { avatarDataUrl } = useProfile()
+  const { avatarUrl, isLoading: avatarLoading } = useProfile()
   const userEmail = session.user?.email ?? 'Profile'
   const initials = userEmail.slice(0, 1).toUpperCase()
   const avatarDimension = 48
 
   const AvatarCircle = ({ dimension }: { dimension: number }) => (
-    avatarDataUrl ? (
+    avatarLoading ? (
+      <div
+        className="flex items-center justify-center rounded-full border border-indigo-400/40 bg-indigo-500/10"
+        style={{ width: dimension, height: dimension }}
+      >
+        <div className="h-3 w-3 animate-pulse rounded-full bg-indigo-200" />
+      </div>
+    ) : avatarUrl ? (
       <img
-        src={avatarDataUrl}
+        src={avatarUrl}
         alt="Profile avatar"
         className="rounded-full border border-indigo-400/50 object-cover"
         style={{ width: dimension, height: dimension }}

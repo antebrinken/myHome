@@ -21,9 +21,11 @@ type CropEditorState = {
 export default function ProfilePage() {
   const session = useSupabaseSession()
   const user = session.user
-  const { avatarDataUrl, setAvatarDataUrl, resetProfile } = useProfile()
+  const { avatarUrl, uploadAvatar, removeAvatar, isLoading: avatarLoading } = useProfile()
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
+  const [isPickingFile, setIsPickingFile] = useState(false)
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false)
+  const [avatarError, setAvatarError] = useState<string | null>(null)
   const [cropEditor, setCropEditor] = useState<CropEditorState | null>(null)
   const avatarSize = DEFAULT_AVATAR_SIZE
 
@@ -32,7 +34,7 @@ export default function ProfilePage() {
     if (!file) {
       return
     }
-    setIsUploading(true)
+    setIsPickingFile(true)
     try {
       const dataUrl = await readFileAsDataUrl(file)
       const image = await loadImageElement(dataUrl)
@@ -54,14 +56,22 @@ export default function ProfilePage() {
         imageHeight: image.height,
       })
     } finally {
-      setIsUploading(false)
+      setIsPickingFile(false)
     }
   }
 
-  function clearAvatar() {
-    setAvatarDataUrl(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+  async function clearAvatar() {
+    setAvatarError(null)
+    setIsSavingAvatar(true)
+    try {
+      await removeAvatar()
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    } catch (error) {
+      setAvatarError(error instanceof Error ? error.message : 'Kunde inte ta bort bilden.')
+    } finally {
+      setIsSavingAvatar(false)
     }
   }
 
@@ -103,12 +113,10 @@ export default function ProfilePage() {
               type="button"
               className="rounded-md border border-white/20 bg-white/5 px-3 py-1.5 text-xs font-medium uppercase tracking-wide hover:bg-white/10"
               onClick={() => {
-                resetProfile()
                 setCropEditor(null)
-                if (fileInputRef.current) {
-                  fileInputRef.current.value = ''
-                }
+                void clearAvatar()
               }}
+              disabled={isSavingAvatar || avatarLoading}
             >
               Reset
             </button>
@@ -123,9 +131,13 @@ export default function ProfilePage() {
                   className="h-full w-full overflow-hidden rounded-full border border-indigo-400/50 bg-slate-800 object-cover"
                   style={{ width: avatarSize, height: avatarSize }}
                 >
-                  {avatarDataUrl ? (
+                  {avatarLoading || isSavingAvatar ? (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-indigo-200 border-t-transparent" />
+                    </div>
+                  ) : avatarUrl ? (
                     <img
-                      src={avatarDataUrl}
+                      src={avatarUrl}
                       alt="Profile avatar preview"
                       className="h-full w-full object-cover"
                       draggable={false}
@@ -142,15 +154,16 @@ export default function ProfilePage() {
                   type="button"
                   className="rounded-md border border-indigo-400/40 bg-indigo-500/20 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-indigo-100 hover:bg-indigo-500/30"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
+                  disabled={isPickingFile || isSavingAvatar || avatarLoading}
                 >
-                  {isUploading ? 'Laddar...' : 'Välj bild'}
+                  {isPickingFile ? 'Laddar...' : 'Välj bild'}
                 </button>
-                {avatarDataUrl && (
+                {avatarUrl && (
                   <button
                     type="button"
                     className="rounded-md border border-white/20 bg-white/5 px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-white hover:bg-white/10"
-                    onClick={clearAvatar}
+                    onClick={() => void clearAvatar()}
+                    disabled={isSavingAvatar || avatarLoading}
                   >
                     Ta bort bild
                   </button>
@@ -164,23 +177,34 @@ export default function ProfilePage() {
                 />
               </div>
             </div>
+            {avatarError && <p className="text-xs text-red-400">{avatarError}</p>}
           </div>
         </Card>
       </div>
       {cropEditor && (
         <CropEditorOverlay
           state={cropEditor}
+          isSaving={isSavingAvatar}
           onClose={() => {
             setCropEditor(null)
             if (fileInputRef.current) {
               fileInputRef.current.value = ''
             }
           }}
-          onConfirm={(result) => {
-            setAvatarDataUrl(result)
-            setCropEditor(null)
-            if (fileInputRef.current) {
-              fileInputRef.current.value = ''
+          onConfirm={async (result) => {
+            setAvatarError(null)
+            setIsSavingAvatar(true)
+            try {
+              const blob = await dataUrlToBlob(result)
+              await uploadAvatar(blob)
+              setCropEditor(null)
+              if (fileInputRef.current) {
+                fileInputRef.current.value = ''
+              }
+            } catch (error) {
+              setAvatarError(error instanceof Error ? error.message : 'Kunde inte spara bilden.')
+            } finally {
+              setIsSavingAvatar(false)
             }
           }}
         />
@@ -212,11 +236,12 @@ function loadImageElement(src: string) {
 
 type CropEditorOverlayProps = {
   state: CropEditorState
+  isSaving: boolean
   onClose: () => void
   onConfirm: (dataUrl: string) => void
 }
 
-function CropEditorOverlay({ state, onClose, onConfirm }: CropEditorOverlayProps) {
+function CropEditorOverlay({ state, onClose, onConfirm, isSaving }: CropEditorOverlayProps) {
   const dragRef = useRef<{ startX: number; startY: number; initialX: number; initialY: number } | null>(null)
   const [currentState, setCurrentState] = useState(state)
 
@@ -238,6 +263,7 @@ function CropEditorOverlay({ state, onClose, onConfirm }: CropEditorOverlayProps
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (isSaving) return
     event.preventDefault()
     dragRef.current = {
       startX: event.clientX,
@@ -359,6 +385,7 @@ function CropEditorOverlay({ state, onClose, onConfirm }: CropEditorOverlayProps
               step={zoomStep}
               value={currentState.zoom}
               onChange={(event) => handleZoomChange(Number(event.target.value))}
+              disabled={isSaving}
             />
           </label>
           <div className="flex w-full justify-end gap-3 text-sm">
@@ -366,6 +393,7 @@ function CropEditorOverlay({ state, onClose, onConfirm }: CropEditorOverlayProps
               type="button"
               className="rounded-md border border-white/20 bg-white/5 px-4 py-2 font-medium hover:bg-white/10"
               onClick={onClose}
+              disabled={isSaving}
             >
               Avbryt
             </button>
@@ -373,8 +401,9 @@ function CropEditorOverlay({ state, onClose, onConfirm }: CropEditorOverlayProps
               type="button"
               className="rounded-md border border-indigo-400/50 bg-indigo-500/20 px-4 py-2 font-semibold text-indigo-100 hover:bg-indigo-500/30"
               onClick={handleConfirm}
+              disabled={isSaving}
             >
-              Spara bild
+              {isSaving ? 'Sparar...' : 'Spara bild'}
             </button>
           </div>
         </div>
@@ -385,4 +414,9 @@ function CropEditorOverlay({ state, onClose, onConfirm }: CropEditorOverlayProps
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
+}
+
+async function dataUrlToBlob(dataUrl: string) {
+  const response = await fetch(dataUrl)
+  return await response.blob()
 }
